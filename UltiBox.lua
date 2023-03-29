@@ -27,7 +27,6 @@ settings:save('all')
 
 windower.register_event('addon command', function(command, ...)
    command = command and command:lower()
-   local args = table.concat({...}, ' ')
 
    if command == 'mount' then
       mount()
@@ -43,6 +42,9 @@ windower.register_event('addon command', function(command, ...)
 
    elseif command == 'follow' then
       follow_toggle()
+
+   elseif command == 'buff' then
+      buff({...})
 
    elseif command == 'heal' then
       heal({...})
@@ -128,6 +130,10 @@ function get_target(type)
    return target
 end
 
+function buff(args)
+   windower.send_command("send "..table.concat(args, " ").." <me>")
+end
+
 function heal(args)
    local target = get_target('lastst')
    if not target then return end
@@ -138,7 +144,7 @@ end
 function nuke(args)
    local target = get_target('t')
    if not target then return end
-
+   for k,v in pairs(args) do log(k,v) end
    windower.send_command("send skookum /p Casting "..args[2].." on "..target.name)
    windower.send_command("send "..table.concat(args, " ").." "..target.id)
 end
