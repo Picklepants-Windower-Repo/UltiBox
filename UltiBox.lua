@@ -11,6 +11,7 @@ _addon.language = 'english'
 -- Windower Libraries
 require('tables')
 require('strings')
+require('logger')
 config = require('config')
 
 local defaults = {
@@ -51,6 +52,9 @@ windower.register_event('addon command', function(command, ...)
       
    elseif command == 'decurse' then
       decurse()
+   elseif command == 'consumables' then
+      log('consumables')
+      consumables()
    end
 end)
 
@@ -168,11 +172,21 @@ function decurse()
 end
 
 function consumables()
-   local buffs = windower.ffxi.get_player().buffs
+   local buffs = T(windower.ffxi.get_player().buffs)
 
-   if not buffs[251] then
+   for k,v in pairs(buffs) do
+      log(k,v)
+   end
+
+   log(table.contains(buffs, 251))
+
+   if not table.contains(buffs, 251) then
       windower.send_command("send skookum /item 'melon pie' <me>")
-   elseif not buffs[43] then
+      windower.send_command("send skookum /p Activating food buff")
+   elseif not table.contains(buffs, 43) then
       windower.send_command("send skookum /item 'yagudo drink' <me>")
+      windower.send_command("send skookum /p Using refresh drink")
+   else
+      windower.send_command("send skookum /p I'm all buffed up!")
    end
 end
