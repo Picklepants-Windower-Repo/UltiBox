@@ -27,6 +27,7 @@ settings:save('all')
 
 windower.register_event('addon command', function(command, ...)
    command = command and command:lower()
+   args = T{...}
 
    if command == 'mount' then
       mount()
@@ -35,22 +36,24 @@ windower.register_event('addon command', function(command, ...)
       warp()
 
    elseif command == 'sws' or command == 'setws' then
-      set_weaponskill({...})
+      set_weaponskill(args)
 
    elseif command == 'attack' then
       attack_toggle()
 
    elseif command == 'follow' then
       follow_toggle()
+   elseif command == 'send' then
+      send(args)
 
-   elseif command == 'buff' then
-      buff({...})
+   elseif command == 'self' then
+      self(args)
 
-   elseif command == 'heal' then
-      heal({...})
+   elseif command == 'other' then
+      other(args)
 
    elseif command == 'nuke' then
-      nuke({...})
+      nuke(args)
       
    elseif command == 'decurse' then
       decurse()
@@ -130,11 +133,34 @@ function get_target(type)
    return target
 end
 
-function buff(args)
-   windower.send_command("send "..table.concat(args, " ").." <me>")
+function send(args)
+   local name = args[1]
+   local command = args[2]
+   local spell = args[3]
+   local target = ''
+
+   if args[4] then
+      for i=4, args:length() do
+         spell = spell:append(' '..args[i])
+      end
+   end
+   -- log(name, command, spell, target)
+   if command == 'self' then
+      target = '<me>'
+   elseif command == 'other' then
+      target = get_target('lastst')
+   elseif command == 'nuke' then
+      target = get_target('t')
+   end
+
+   windower.send_command("send "..name.." ub "..command.." "..spell.." "..target)
 end
 
-function heal(args)
+function self(args)
+   windower.send_command("input /ma "..spell.." "..target)
+end
+
+function other(args)
    local target = get_target('lastst')
    if not target then return end
 
