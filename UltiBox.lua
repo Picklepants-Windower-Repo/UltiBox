@@ -154,11 +154,12 @@ function send(args)
       target = '<me>'
    elseif command == 'other' then
       windower.send_command("input /ta <stpt>")
-      local stpt = windower.ffxi.get_mob_by_target('stpt')
-
-      while not windower.ffxi.get_mob_by_target('stpt') do end
-      while windower.ffxi.get_mob_by_target('stpt') do end
       
+      coroutine.sleep(.01) -- Credit to Rubenator for teaching me about coroutine
+      while windower.ffxi.get_mob_by_target('stpt') do
+         coroutine.sleep(1)
+      end
+
       target = get_target('lastst')
       if target then target = target.id end
    elseif command == 'nuke' then
