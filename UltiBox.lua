@@ -46,26 +46,22 @@ windower.register_event('addon command', function(command, ...)
       follow_toggle()
    elseif command == 'send' then
       send(args)
-   elseif command == 'self' then
-      cast_self(args)
-   elseif command == 'other' then
-      cast_other(args)
-   elseif command == 'nuke' then
-      nuke(args)
+   elseif command == 'cast' then
+      cast(args)
    elseif command == 'decurse' then
       decurse()
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      -- local timers = T(windower.ffxi.get_spell_recasts()):filter(function(x) return x ~= 0 end)
-      -- local spell_id = res.spells:en('Aquaveil'):keyset()
-      -- log(spell_id, timers[spell_id])
-      -- for k,v in pairs(timers) do log(k,v) end
-      -- if timers[spell_id] ~= 0 then
-      --    -- time remaining = 
-      --    -- log('Spell cooldown remaining '..time_remaining)
-      -- end
-      check_cooldown('Aquaveil')
+      -- finds mob in local mob array with the given name
+      local mobs = T(windower.ffxi.get_mob_array()):with('id', 17248264)
+      for k,v in pairs(mobs) do log(k,v) end
+
+      -- log('----------------------------------------------')
+      
+      local target = windower.ffxi.get_mob_by_target('t')
+      -- for k,v in pairs(target) do log(k,v) end
+      -- log(target.id)
    end
 end)
 
@@ -131,76 +127,60 @@ end
 function send(args)
    local name = args[1]
    local command = args[2]
-   local spell = args[3]
+   local spell = args:slice(3, args:length()):concat(' ')
    local target = ''
-
-   if args[4] then
-      for i=4, args:length() do
-         spell = spell:append(' '..args[i])
-      end
-   end
 
    if command == 'self' then
       target = '<me>'
    elseif command == 'other' then
       target = get_target('lastst')
+      if target then target = target.id end
    elseif command == 'nuke' then
       target = get_target('t')
+      if target then target = target.id end
    end
-
+   
    if not target then return end
-
-   windower.send_command("send "..name.." ub "..command.." "..spell.." "..target)
+   windower.send_command("send "..name.." ub cast "..spell.." "..target)
 end
 
-function cast_self(args)
-   local target = args:last()
-   local spell = args[1]
-
-   if args:length() > 2 then
-      for i=2, args:length()-1 do
-         spell = spell:append(' '..args[i])
-      end
+function cast(args)
+   local target_id = args:last()
+   local spell = args:slice(1, args:length()-1):concat(' ')
+   local target_name = ''
+   
+   if target_id == '<me>' then
+      target_name = 'myself'
+   else
+      target_name = T(windower.ffxi.get_mob_array()):with('id', tonumber(target_id)).name
    end
 
-   local cooldown = cooldown(spell)
+   log(target_id, spell, target_name)
+
+   local spell_name, spell_id = spell_name_and_id(spell)
+   local cooldown = cooldown(spell_id)
 
    if cooldown then
-      windower.send_command("input /p "..spell.." cooldown remaining "..cooldown)
+      windower.send_command("input /p "..spell_name.." cooldown remaining "..cooldown)
    else
-      windower.send_command("input /p Casting "..spell)
-      windower.send_command("input /ma "..spell.." "..target)
+      windower.send_command("input /p Casting "..spell_name.." on "..target_name)
+      windower.send_command('input /ma "'..spell_name..'" '..target_id)
    end
-end
-
-function cast_other(args)
-   
-
-
-   windower.send_command("send "..table.concat(args, " ").." "..target.name)
-end
-
-function nuke(args)
-   local target = get_target('t')
-   if not target then return end
-   for k,v in pairs(args) do log(k,v) end
-   windower.send_command("send skookum /p Casting "..args[2].." on "..target.name)
-   windower.send_command("send "..table.concat(args, " ").." "..target.id)
 end
 
 function decurse()
-   local buffs = T(windower.ffxi.get_player().buffs)
    local target = get_target('lastst')
    if not target then return end
 
+   local buffs = T(windower.ffxi.get_player().buffs)
+   local dispel = flase
    local dispel_priority = T{
       [4] = 'paralyna',
       [5] = 'blindna',
       [6] = 'silena',
       [3] = 'poisona'
    }
-
-   local dispel = flase
+   
    for _,v in pairs(buffs) do
       if dispel_priority[v] then
          dispel = dispel_priority[v]
@@ -208,12 +188,10 @@ function decurse()
    end
   
    if dispel then
-      windower.send_command("send skookum /p Casting "..dispel.." on "..target.name)
-      windower.send_command("send skookum /ma "..dispel.." "..target.name)
-      return
+      windower.send_command("ub send other skookum"..dispel)
+   else
+      windower.send_command("send skookum /p Nothing to dispel")
    end
-
-   windower.send_command("send skookum /p Nothing to dispel")
 end
 
 function consumables()
