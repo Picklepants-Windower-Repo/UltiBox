@@ -236,7 +236,21 @@ function add_buff(buff)
 end
 
 function remove_buff(buff)
+   local buff_name, buff_id = spell_name_and_id(buff)
 
+   if not buff_name and not buff_id then
+      log('Invalid buff name')
+      return
+   end
+   
+   if not settings.buffs[buff_name:lower()] then
+      log('That buff is not in saved buffs')
+      return
+   end
+
+   settings.buffs = remove(settings.buffs, buff_name:lower())
+   settings:save('all')
+   log(buff_name..' has been removed from buffs')
 end
 
 function buff()
