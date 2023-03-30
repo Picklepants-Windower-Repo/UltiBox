@@ -9,9 +9,11 @@ _addon.language = 'english'
 -------------------------------------------------------------------------------------
 
 -- Windower Libraries
-require('tables')
-require('strings')
 require('logger')
+require('sets')
+require('strings')
+require('tables')
+res = require('resources')
 config = require('config')
 
 local defaults = {
@@ -20,6 +22,7 @@ local defaults = {
 
 settings = config.load(defaults)
 settings:save('all')
+
 
 -------------------------------------------------------------------------------------
 -- Windower Event Functions
@@ -31,35 +34,35 @@ windower.register_event('addon command', function(command, ...)
 
    if command == 'mount' then
       mount()
-
    elseif command == 'warp' then
       warp()
-
    elseif command == 'sws' or command == 'setws' then
       set_weaponskill(args)
-
    elseif command == 'attack' then
       attack_toggle()
-
    elseif command == 'follow' then
       follow_toggle()
    elseif command == 'send' then
       send(args)
-
    elseif command == 'self' then
-      self(args)
-
+      cast_self(args)
    elseif command == 'other' then
-      other(args)
-
+      cast_other(args)
    elseif command == 'nuke' then
       nuke(args)
-      
    elseif command == 'decurse' then
       decurse()
    elseif command == 'consumables' then
-      log('consumables')
       consumables()
+   elseif command == 'test' then
+      local timers = T(windower.ffxi.get_spell_recasts()):filter(function(x) return x ~= 0 end)
+      local spell_id = res.spells:en('Aquaveil'):keyset()
+      -- log(spell_id, timers[spell_id])
+      for k,v in pairs(timers) do log(k,v) end
+      if timers[spell_id] ~= 0 then
+         -- time remaining = 
+         -- log('Spell cooldown remaining '..time_remaining)
+      end
    end
 end)
 
@@ -144,7 +147,7 @@ function send(args)
          spell = spell:append(' '..args[i])
       end
    end
-   -- log(name, command, spell, target)
+
    if command == 'self' then
       target = '<me>'
    elseif command == 'other' then
@@ -156,11 +159,20 @@ function send(args)
    windower.send_command("send "..name.." ub "..command.." "..spell.." "..target)
 end
 
-function self(args)
+function cast_self(args)
+   local target = args:last()
+   local spell = args[1]
+
+   if args:length() > 2 then
+      for i=2, args:length() do
+         spell = spell:append(' '..args[i])
+      end
+   end
+
    windower.send_command("input /ma "..spell.." "..target)
 end
 
-function other(args)
+function cast_other(args)
    local target = get_target('lastst')
    if not target then return end
 
