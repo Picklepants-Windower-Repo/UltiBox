@@ -5,8 +5,10 @@
 -- To Do:                                                                          --
 -- Add help command and text                                                       --
 -- Add state for alt target that can be viewed and updated in game                 --
+-- Add functions to handle job abilities                                           --
 -- Mount Function: Add ability to set preferred mount and validate                 --
 -- Consumables Function: Add ability to set consumables in game                    --
+-- Add two_hour function that detects job and sends appropriate SP ability         --
 -------------------------------------------------------------------------------------
 
 _addon.name = 'UltiBox'
@@ -72,15 +74,14 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      -- finds mob in local mob array with the given name
-      local mobs = T(windower.ffxi.get_mob_array()):with('id', 17248264)
-      for k,v in pairs(mobs) do log(k,v) end
-
-      -- log('----------------------------------------------')
-      
-      local target = windower.ffxi.get_mob_by_target('t')
-      -- for k,v in pairs(target) do log(k,v) end
-      -- log(target.id)
+      local sub_target = windower.ffxi.get_mob_by_target('stpt')
+      local last_sub_target = windower.ffxi.get_mob_by_target('lastst')
+      if sub_target then
+         log('st '..sub_target.id)
+      end
+      if last_sub_target then
+         log('lastst '..last_sub_target.id)
+      end
    end
 end)
 
@@ -152,6 +153,12 @@ function send(args)
    if command == 'self' then
       target = '<me>'
    elseif command == 'other' then
+      windower.send_command("input /ta <stpt>")
+      local stpt = windower.ffxi.get_mob_by_target('stpt')
+
+      while not windower.ffxi.get_mob_by_target('stpt') do end
+      while windower.ffxi.get_mob_by_target('stpt') do end
+      
       target = get_target('lastst')
       if target then target = target.id end
    elseif command == 'nuke' then
