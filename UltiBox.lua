@@ -10,11 +10,13 @@ _addon.language = 'english'
 
 -- Windower Libraries
 require('logger')
-require('sets')
 require('strings')
 require('tables')
-res = require('resources')
+-- res = require('resources')
 config = require('config')
+
+-- Local Imports
+require('helper_functions')
 
 local defaults = {
    weaponskill = {},
@@ -55,14 +57,15 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      local timers = T(windower.ffxi.get_spell_recasts()):filter(function(x) return x ~= 0 end)
-      local spell_id = res.spells:en('Aquaveil'):keyset()
+      -- local timers = T(windower.ffxi.get_spell_recasts()):filter(function(x) return x ~= 0 end)
+      -- local spell_id = res.spells:en('Aquaveil'):keyset()
       -- log(spell_id, timers[spell_id])
-      for k,v in pairs(timers) do log(k,v) end
-      if timers[spell_id] ~= 0 then
-         -- time remaining = 
-         -- log('Spell cooldown remaining '..time_remaining)
-      end
+      -- for k,v in pairs(timers) do log(k,v) end
+      -- if timers[spell_id] ~= 0 then
+      --    -- time remaining = 
+      --    -- log('Spell cooldown remaining '..time_remaining)
+      -- end
+      check_cooldown('Aquaveil')
    end
 end)
 
@@ -125,17 +128,6 @@ function follow_toggle()
    end
 end
 
-function get_target(type)
-   local target = windower.ffxi.get_mob_by_target(type)
-
-   if not target then
-      log('No target - cancelling operation')
-      return false
-   end
-
-   return target
-end
-
 function send(args)
    local name = args[1]
    local command = args[2]
@@ -156,6 +148,8 @@ function send(args)
       target = get_target('t')
    end
 
+   if not target then return end
+
    windower.send_command("send "..name.." ub "..command.." "..spell.." "..target)
 end
 
@@ -164,17 +158,24 @@ function cast_self(args)
    local spell = args[1]
 
    if args:length() > 2 then
-      for i=2, args:length() do
+      for i=2, args:length()-1 do
          spell = spell:append(' '..args[i])
       end
    end
 
-   windower.send_command("input /ma "..spell.." "..target)
+   local cooldown = cooldown(spell)
+
+   if cooldown then
+      windower.send_command("input /p "..spell.." cooldown remaining "..cooldown)
+   else
+      windower.send_command("input /p Casting "..spell)
+      windower.send_command("input /ma "..spell.." "..target)
+   end
 end
 
 function cast_other(args)
-   local target = get_target('lastst')
-   if not target then return end
+   
+
 
    windower.send_command("send "..table.concat(args, " ").." "..target.name)
 end
