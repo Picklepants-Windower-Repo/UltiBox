@@ -12,13 +12,12 @@ _addon.language = 'english'
 require('logger')
 require('strings')
 require('tables')
--- res = require('resources')
 config = require('config')
 
 -- Local Imports
 require('helper_functions')
 
-local defaults = {
+local defaults = T{
    weaponskill = T{},
    buffs = T{}
 }
@@ -51,6 +50,12 @@ windower.register_event('addon command', function(command, ...)
       cast(args)
    elseif command == 'decurse' then
       decurse()
+   elseif command == 'dbfs' or command == 'displaybuffs' then
+      display_buffs()
+   elseif command == 'abf' or command == 'addbuff' then
+      add_buff(args:concat(' '))
+   elseif command == 'rbf' or command == 'removebuff' then
+      remove_buff(args:concat(' '))
    elseif command == 'buff' then
       buff()
    elseif command == 'consumables' then
@@ -198,17 +203,39 @@ function decurse()
 end
 
 function display_buffs()
+   if settings.buffs:length() < 1 then
+      log('There are no saved buffs')
+      return
+   end
+   
    log('Current buffs:')
-   for k,_ in buffs do
-      windower.add_to_chat(158, k)
+   for k,_ in pairs(settings.buffs) do
+      local name, id = spell_name_and_id(k)
+      windower.add_to_chat(158, name)
    end
 end
 
-function add_buff(buff_name)
+function add_buff(buff)
+   local buff_name, buff_id = spell_name_and_id(buff)
 
+   if not buff_name and not buff_id then
+      log('Invalid buff name')
+      return
+   end
+
+   if settings.buffs[buff_name:lower()] then
+      log('Buff is already saved')
+      return
+   end
+
+   local buff_cast_time = res.spells[buff_id].cast_time
+   
+   settings.buffs[buff_name] = {id = buff_id, cast_time = buff_cast_time}
+   settings:save('all')
+   log(buff_name..' has been added to buffs')
 end
 
-function remove_buff(buff_name)
+function remove_buff(buff)
 
 end
 
