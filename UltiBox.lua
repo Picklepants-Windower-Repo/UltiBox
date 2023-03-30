@@ -50,7 +50,7 @@ windower.register_event('addon command', function(command, ...)
       cast(args)
    elseif command == 'decurse' then
       decurse()
-   elseif command == 'dbfs' or command == 'displaybuffs' then
+   elseif command == 'buffs' or command == 'displaybuffs' then
       display_buffs()
    elseif command == 'abf' or command == 'addbuff' then
       add_buff(args:concat(' '))
@@ -163,8 +163,6 @@ function cast(args)
       target_name = T(windower.ffxi.get_mob_array()):with('id', tonumber(target_id)).name
    end
 
-   log(target_id, spell, target_name)
-
    local spell_name, spell_id = spell_name_and_id(spell)
    local cooldown = cooldown(spell_id)
 
@@ -242,7 +240,7 @@ function remove_buff(buff)
       log('Invalid buff name')
       return
    end
-   
+
    if not settings.buffs[buff_name:lower()] then
       log('That buff is not in saved buffs')
       return
@@ -254,7 +252,18 @@ function remove_buff(buff)
 end
 
 function buff()
+   if settings.buffs:length() < 1 then
+      windower.send_command("send skookum /p No buffs to cast")
+      return
+   end
 
+   local buff_string = ''
+   for k, v in pairs(settings.buffs) do
+      local wait_time = v.cast_time * 2 + 2
+      buff_string = buff_string:append("ub cast "..k.." <me>; wait "..wait_time.."; ")
+   end
+   log(buff_string)
+   windower.send_command(buff_string)
 end
 
 function consumables()
