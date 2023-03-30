@@ -1,3 +1,14 @@
+-------------------------------------------------------------------------------------
+-- UltiBox                                                                         --
+-- A configurable mod for multiboxing                                              --
+--                                                                                 --
+-- To Do:                                                                          --
+-- Add help command and text                                                       --
+-- Add state for alt target that can be viewed and updated in game                 --
+-- Mount Function: Add ability to set preferred mount and validate                 --
+-- Consumables Function: Add ability to set consumables in game                    --
+-------------------------------------------------------------------------------------
+
 _addon.name = 'UltiBox'
 _addon.author = 'Picklepants'
 _addon.version = '1.0.0'
