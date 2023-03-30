@@ -19,7 +19,8 @@ config = require('config')
 require('helper_functions')
 
 local defaults = {
-   weaponskill = {},
+   weaponskill = T{},
+   buffs = T{}
 }
 
 settings = config.load(defaults)
@@ -50,6 +51,8 @@ windower.register_event('addon command', function(command, ...)
       cast(args)
    elseif command == 'decurse' then
       decurse()
+   elseif command == 'buff' then
+      buff()
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
@@ -192,6 +195,25 @@ function decurse()
    else
       windower.send_command("send skookum /p Nothing to dispel")
    end
+end
+
+function display_buffs()
+   log('Current buffs:')
+   for k,_ in buffs do
+      windower.add_to_chat(158, k)
+   end
+end
+
+function add_buff(buff_name)
+
+end
+
+function remove_buff(buff_name)
+
+end
+
+function buff()
+
 end
 
 function consumables()
