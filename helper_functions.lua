@@ -57,3 +57,21 @@ function remove(table, key)
 
    return new_table
 end
+
+function format_display_name(saved_name)
+   if saved_name == '' then return false end
+
+   saved_name = saved_name
+      :gsub('_', ' ')
+
+   return saved_name
+end
+
+function format_save_name(set_name)
+   if set_name == '' then return false end
+
+   set_name = set_name
+      :gsub(' ', '_')
+
+   return set_name
+end
