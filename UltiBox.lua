@@ -185,22 +185,52 @@ end
 function decurse(target)
    local buffs = T(windower.ffxi.get_player().buffs)
    local dispel = flase
-   local dispel_priority = T{
+   local debuffs = T{
+      [3] = 'poisona',
       [4] = 'paralyna',
       [5] = 'blindna',
       [6] = 'silena',
-      [3] = 'poisona',
-      [257] = 'cursna'
+      [8] = 'viruna',
+      [20] = 'cursna',
+      [31] = 'viruna',
    }
-   
+   local magic_debuffs = T{
+      [10] = true,  -- Stun
+      [11] = true,  -- Bind
+      [12] = true,  -- Weight
+      [13] = true,  -- Slow
+      [14] = true,  -- Charm
+      [15] = true,  -- Doom
+      [16] = true,  -- Amnesia
+      [17] = true,  -- Charm -- again?
+      [18] = true,  -- Gradual Petrification
+      [128] = true, -- Burn
+      [129] = true, -- Frost
+      [130] = true, -- Choke
+      [131] = true, -- Rasp
+      [132] = true, -- Shock
+      [133] = true, -- Drown
+      [134] = true, -- Dia
+      [135] = true, -- Bio
+      [136] = true, -- STR Down
+      [137] = true, -- DEX Down
+      [138] = true, -- VIT Down
+      [139] = true, -- AGI Down
+      [140] = true, -- INT Down
+      [141] = true, -- MND Down
+      [142] = true, -- CHR Down
+   }
+
    for _,v in pairs(buffs) do
-      if dispel_priority[v] then
-         dispel = dispel_priority[v]
+      if debuffs[v] then
+         dispel = debuffs[v]
+      elseif magic_debuffs[v] then
+         dispel = 'erase'
       end
    end
   
    if dispel then
-      windower.send_command("ub send other skookum"..dispel)
+      windower.send_command("ub send skookum other "..dispel)
    else
       windower.send_command("send skookum /p Nothing to dispel")
    end
@@ -266,7 +296,7 @@ function buff()
    local buff_string = ''
    for k, v in pairs(settings.buffs) do
       local wait_time = v.cast_time * 2 + 3
-      buff_string = buff_string:append("ub cast "..k.." <me>; wait "..wait_time.."; ")
+      buff_string = buff_string:append("ub cast "..format_display_name(k).." <me>; wait "..wait_time.."; ")
    end
    log(buff_string)
    windower.send_command(buff_string)
