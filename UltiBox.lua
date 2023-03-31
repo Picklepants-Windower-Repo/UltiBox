@@ -25,6 +25,7 @@ _addon.language = 'english'
 require('logger')
 require('strings')
 require('tables')
+require('chat')
 config = require('config')
 
 -- Local Imports
@@ -74,14 +75,9 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      local sub_target = windower.ffxi.get_mob_by_target('stpt')
-      local last_sub_target = windower.ffxi.get_mob_by_target('lastst')
-      if sub_target then
-         log('st '..sub_target.id)
-      end
-      if last_sub_target then
-         log('lastst '..last_sub_target.id)
-      end
+      word = 'test'
+      string = 'this is a '..word:color(158, 55)..' of the chat library color function'
+      windower.add_to_chat(55, string)
    end
 end)
 
@@ -153,14 +149,7 @@ function send(args)
    if command == 'self' then
       target = '<me>'
    elseif command == 'other' then
-      windower.send_command("input /ta <stpt>")
-      
-      coroutine.sleep(.01) -- Credit to Rubenator for teaching me about coroutine
-      while windower.ffxi.get_mob_by_target('stpt') do
-         coroutine.sleep(1)
-      end
-
-      target = get_target('lastst')
+      target = get_sub_target()
       if target then target = target.id end
    elseif command == 'nuke' then
       target = get_target('t')
@@ -193,17 +182,15 @@ function cast(args)
    end
 end
 
-function decurse()
-   local target = get_target('lastst')
-   if not target then return end
-
+function decurse(target)
    local buffs = T(windower.ffxi.get_player().buffs)
    local dispel = flase
    local dispel_priority = T{
       [4] = 'paralyna',
       [5] = 'blindna',
       [6] = 'silena',
-      [3] = 'poisona'
+      [3] = 'poisona',
+      [257] = 'cursna'
    }
    
    for _,v in pairs(buffs) do
@@ -278,7 +265,7 @@ function buff()
 
    local buff_string = ''
    for k, v in pairs(settings.buffs) do
-      local wait_time = v.cast_time * 2 + 2
+      local wait_time = v.cast_time * 2 + 3
       buff_string = buff_string:append("ub cast "..k.." <me>; wait "..wait_time.."; ")
    end
    log(buff_string)

@@ -12,6 +12,17 @@ function get_target(type)
    return target
 end
 
+function get_sub_target()
+   windower.send_command("input /ta <stpt>")
+      
+   coroutine.sleep(.01) -- Credit to Rubenator for teaching me about coroutine
+   while windower.ffxi.get_mob_by_target('stpt') do
+      coroutine.sleep(1)
+   end
+
+   return get_target('lastst')
+end
+
 function cooldown(spell_id)
    -- Gets table with spells that are on cooldown
    local timers = T(windower.ffxi.get_spell_recasts()):filter(function(x) return x ~= 0 end)
