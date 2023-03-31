@@ -214,7 +214,7 @@ function display_buffs()
    
    log('Current buffs:')
    for k,_ in pairs(settings.buffs) do
-      local name, id = spell_name_and_id(k)
+      local name, id = spell_name_and_id(format_display_name(k))
       windower.add_to_chat(158, name)
    end
 end
@@ -227,14 +227,14 @@ function add_buff(buff)
       return
    end
 
-   if settings.buffs[buff_name:lower()] then
+   if settings.buffs[format_save_name(buff_name):lower()] then
       log('Buff is already saved')
       return
    end
 
    local buff_cast_time = res.spells[buff_id].cast_time
    
-   settings.buffs[buff_name] = {id = buff_id, cast_time = buff_cast_time}
+   settings.buffs[format_save_name(buff_name)] = {id = buff_id, cast_time = buff_cast_time}
    settings:save('all')
    log(buff_name..' has been added to buffs')
 end
@@ -247,12 +247,12 @@ function remove_buff(buff)
       return
    end
 
-   if not settings.buffs[buff_name:lower()] then
+   if not settings.buffs[format_save_name(buff_name):lower()] then
       log('That buff is not in saved buffs')
       return
    end
 
-   settings.buffs = remove(settings.buffs, buff_name:lower())
+   settings.buffs = remove(settings.buffs, format_save_name(buff_name):lower())
    settings:save('all')
    log(buff_name..' has been removed from buffs')
 end
