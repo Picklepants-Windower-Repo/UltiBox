@@ -190,7 +190,9 @@ function decurse(target)
       [4] = 'paralyna',
       [5] = 'blindna',
       [6] = 'silena',
+      [7] = 'stona',
       [8] = 'viruna',
+      [9] = 'cursna',
       [20] = 'cursna',
       [31] = 'viruna',
    }
@@ -219,9 +221,13 @@ function decurse(target)
       [140] = true, -- INT Down
       [141] = true, -- MND Down
       [142] = true, -- CHR Down
+      [146] = true, -- Accuracy Down
+      [147] = true, -- Attack Down
+      [148] = true, -- Evasion Down
+      [149] = true, -- Defense Down
    }
 
-   for _,v in pairs(buffs) do
+   for k,v in pairs(buffs) do
       if debuffs[v] then
          dispel = debuffs[v]
       elseif magic_debuffs[v] then
@@ -230,7 +236,7 @@ function decurse(target)
    end
   
    if dispel then
-      windower.send_command("ub send skookum other "..dispel)
+      windower.send_command("send skookum /ma "..dispel.." picklepants")
    else
       windower.send_command("send skookum /p Nothing to dispel")
    end
