@@ -76,8 +76,8 @@ windower.register_event('addon command', function(command, ...)
       consumables()
    elseif command == 'test' then
       word = 'test'
-      string = 'this is a '..word:color(158, 55)..' of the chat library color function'
-      windower.add_to_chat(55, string)
+      string = 'this is a test of the chat library color function'
+      log(string:match(word))
    end
 end)
 
@@ -276,6 +276,12 @@ function add_buff(buff)
 end
 
 function remove_buff(buff)
+   if buff:lower() == 'all' then
+      settings.buffs = {}
+      settings:save('all')
+      log('All buffs have been removed')
+      return
+   end
    local buff_name, buff_id = spell_name_and_id(buff)
 
    if not buff_name and not buff_id then
