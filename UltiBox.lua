@@ -277,7 +277,7 @@ end
 
 function remove_buff(buff)
    if buff:lower() == 'all' then
-      settings.buffs = {}
+      settings.buffs = T{}
       settings:save('all')
       log('All buffs have been removed')
       return
