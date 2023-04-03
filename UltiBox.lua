@@ -39,6 +39,7 @@ local defaults = T{
 settings = config.load(defaults)
 settings:save('all')
 
+key_pressed = ''
 
 -------------------------------------------------------------------------------------
 -- Windower Event Functions
@@ -79,6 +80,10 @@ windower.register_event('addon command', function(command, ...)
       string = 'this is a test of the chat library color function'
       log(string:match(word))
    end
+end)
+
+windower.register_event('keyboard', function(key)
+   key_pressed = key
 end)
 
 -------------------------------------------------------------------------------------
@@ -316,12 +321,6 @@ end
 
 function consumables()
    local buffs = T(windower.ffxi.get_player().buffs)
-
-   for k,v in pairs(buffs) do
-      log(k,v)
-   end
-
-   log(table.contains(buffs, 251))
 
    if not table.contains(buffs, 251) then
       windower.send_command("send skookum /item 'melon pie' <me>")

@@ -13,6 +13,7 @@ function get_target(type)
 end
 
 function get_sub_target()
+   key_pressed = ''
    windower.send_command("input /ta <stpt>")
       
    coroutine.sleep(.01) -- Credit to Rubenator for teaching me about coroutine
@@ -20,7 +21,11 @@ function get_sub_target()
       coroutine.sleep(1)
    end
 
-   return get_target('lastst')
+   if key_pressed == 28 then
+      return get_target('lastst')
+   else
+      return false
+   end
 end
 
 function cooldown(spell_id)
