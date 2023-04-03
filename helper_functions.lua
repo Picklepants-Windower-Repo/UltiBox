@@ -16,9 +16,9 @@ function get_sub_target()
    key_pressed = ''
    windower.send_command("input /ta <stpt>")
       
-   coroutine.sleep(.01) -- Credit to Rubenator for teaching me about coroutine
+   coroutine.sleep(0.01) -- Credit to Rubenator for teaching me about coroutine
    while windower.ffxi.get_mob_by_target('stpt') do
-      coroutine.sleep(1)
+      coroutine.sleep(0.5)
    end
 
    if key_pressed == 28 then

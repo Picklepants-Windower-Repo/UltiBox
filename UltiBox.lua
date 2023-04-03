@@ -83,7 +83,9 @@ windower.register_event('addon command', function(command, ...)
 end)
 
 windower.register_event('keyboard', function(key)
-   key_pressed = key
+   if key == 28 or key == 1 then
+      key_pressed = key
+   end
 end)
 
 -------------------------------------------------------------------------------------
