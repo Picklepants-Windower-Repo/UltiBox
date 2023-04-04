@@ -33,12 +33,18 @@ require('helper_functions')
 
 local defaults = T{
    buffs = T{},
+   color = T{},
    mount = 'raptor',
    weaponskill = T{},
 }
 
+defaults.color['green'] = 158
+defaults.color['red'] = 39
+defaults.color['text'] = 166
+defaults.color['message'] = 63
+
 settings = config.load(defaults)
-settings:save()
+settings:save('all')
 
 key_pressed = ''
 
@@ -50,10 +56,14 @@ windower.register_event('addon command', function(command, ...)
    command = command and command:lower()
    args = T{...}
 
-   if command == 'mount' then
-      mount()
-   elseif command == 'warp' then
+   if command == 'warp' then
       warp()
+   elseif command == 'shm' or command == 'showmount' then
+      display_mount()
+   elseif command == 'setm' or command == 'setmount' then
+      set_mount()
+   elseif command == 'mount' then
+      mount()
    elseif command == 'sws' or command == 'setws' then
       set_weaponskill(args)
    elseif command == 'attack' then
@@ -103,6 +113,10 @@ function warp()
    else
       windower.send_command("input /equip ring2 'warp ring'; wait 11; input /item 'warp ring' <me>")
    end   
+end
+
+function display_mount()
+   windower.add_to_chat(settings.color.message, 'Current mount is the '..settings.mount:color(settings.color.green, settings.color.message))
 end
 
 function mount()
