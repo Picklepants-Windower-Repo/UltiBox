@@ -56,9 +56,9 @@ function is_mount(mount_name)
 end
 
 function have_mount(mount_name)
-   local mounts = filter_table(windower.ffxi.get_key_items(), (function(_,v) 
-      return v > 3071 and v < 3108 
-   end))
+   local mounts = T(windower.ffxi.get_key_items()):filter(function(x)
+      return x > 3071 and x < 3108
+   end)
    
    for _,v in pairs(mounts) do
       if mount_name:lower() == res.key_items[v].en:gsub(' companion', ''):gsub('♪', ''):lower() then
@@ -96,16 +96,4 @@ function remove(table, key)
    end
 
    return new_table
-end
-
-function filter_table(table, match_function)
-   local filtered_table = T{}
-
-   for k,v in pairs(table) do
-      if match_function(k,v) then
-         filtered_table[k] = v
-      end
-   end
-
-   return filtered_table
 end

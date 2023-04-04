@@ -31,21 +31,21 @@ config = require('config')
 -- Local Imports
 require('helper_functions')
 
+--
 local defaults = T{
-   -- buffs = T{},
-   -- mount = 'raptor',
-   -- weaponskill = T{},
+   buffs = T{},
+   mount = 'raptor',
+   weaponskill = T{},
 }
 
-
 settings = config.load(defaults)
-settings:save()
 
-color = T{}
-color['green'] = 158
-color['red'] = 39
-color['notify'] = 166
-color['message'] = 63
+local color = T{
+   ['green'] = 158,
+   ['red'] = 39,
+   ['notify'] = 166,
+   ['message'] = 63,
+}
 key_pressed = ''
 
 -------------------------------------------------------------------------------------
@@ -87,11 +87,7 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      -- local mounts = filter_table(windower.ffxi.get_key_items(), (function(k,v) 
-      --    return v > 3071 and v < 3108
-      -- end))
-
-      -- for k,v in pairs(mounts) do log(k,v) end
+      
    end
 end)
 
@@ -138,7 +134,7 @@ function set_mount(mount_name)
       return
    end
 
-   settings['mount'] = mount_name:lower()
+   settings.mount = mount_name:lower()
    settings:save()
    windower.add_to_chat(color.message, "Mount has been set to "..settings.mount:color(color.green, color.message))
 end
@@ -155,10 +151,8 @@ function mount()
 
    if mounted then
       windower.send_command('input /dismount')
-   elseif have_mount() then
-      windower.send_command('input /mount '..settings.mount)
    else
-      windower.add_to_chat(color.message, "You don't have that mount")
+      windower.send_command('input /mount '..settings.mount)
    end
 end
 
