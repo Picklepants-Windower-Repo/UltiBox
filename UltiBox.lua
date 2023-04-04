@@ -55,21 +55,22 @@ key_pressed = ''
 windower.register_event('addon command', function(command, ...)
    command = command and command:lower()
    args = T{...}
+   argstring = args:concat(' ')
 
    if command == 'warp' then
       warp()
    elseif command == 'shm' or command == 'showmount' then
       display_mount()
    elseif command == 'setm' or command == 'setmount' then
-      set_mount(args:concat(' '))
+      set_mount(argstring)
    elseif command == 'mount' then
       mount()
    elseif command == 'sws' or command == 'setws' then
       set_weaponskill(args)
-   elseif command == 'attack' then
-      attack_toggle()
+   elseif command == 'assist' then
+      assist_toggle(argstring)
    elseif command == 'follow' then
-      follow_toggle(args:concat(' '))
+      follow_toggle(argstring)
    elseif command == 'send' then
       send(args)
    elseif command == 'cast' then
@@ -79,15 +80,15 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'buffs' or command == 'displaybuffs' then
       display_buffs()
    elseif command == 'abf' or command == 'addbuff' then
-      add_buff(args:concat(' '))
+      add_buff(argstring)
    elseif command == 'rbf' or command == 'removebuff' then
-      remove_buff(args:concat(' '))
+      remove_buff(argstring)
    elseif command == 'buff' then
       buff()
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      log(windower.ffxi.get_player().index)
+      log(windower.ffxi.get_player().target_locked)
    end
 end)
 
@@ -166,18 +167,40 @@ function set_weaponskill(args)
    log(skill..' has been saved for '..name)
 end
 
-function attack_toggle()
-      attacking = true
-      windower.send_command("send picklepants /attack; wait 1; send @others /assist picklepants; wait 2; send @others /attack; wait 1; send @others /follow picklepants")
-end
+function assist_toggle(assist_target)
+   local player = windower.ffxi.get_player()
 
-function follow_toggle(target)
-   if target == '' then
-      windower.send_command("send @others ub follow "..windower.ffxi.get_player().index)
+   if not player.in_combat then
+      windower.add_to_chat(color.message, "You are not in combat")
       return
    end
 
-   if not windower.ffxi.get_player().follow_index then
+   if assist_target == '' then
+      windower.send_command("send @others ub assist "..player.name)
+      return
+   end
+
+   if not player.in_combat then
+      windower.send_command("input /assist "..assist_target)
+      coroutine.sleep(1.5)
+      windower.send_command("input /attack")
+   else
+      windower.send_command("input /attack")
+      if player.target_locked then
+         windower.send_command("setkey numpad* down; wait 0.1; setkey numpad* up")
+      end
+   end
+end
+
+function follow_toggle(target)
+   local player = windower.ffxi.get_player()
+
+   if target == '' then
+      windower.send_command("send @others ub follow "..player.index)
+      return
+   end
+
+   if not player.follow_index then
       windower.ffxi.follow(tonumber(target))
    else
       windower.ffxi.follow()
