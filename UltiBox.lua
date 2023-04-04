@@ -32,20 +32,20 @@ config = require('config')
 require('helper_functions')
 
 local defaults = T{
-   buffs = T{},
-   color = T{},
-   mount = 'raptor',
-   weaponskill = T{},
+   -- buffs = T{},
+   -- mount = 'raptor',
+   -- weaponskill = T{},
 }
 
-defaults.color['green'] = 158
-defaults.color['red'] = 39
-defaults.color['text'] = 166
-defaults.color['message'] = 63
 
 settings = config.load(defaults)
-settings:save('all')
+settings:save()
 
+color = T{}
+color['green'] = 158
+color['red'] = 39
+color['notify'] = 166
+color['message'] = 63
 key_pressed = ''
 
 -------------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'shm' or command == 'showmount' then
       display_mount()
    elseif command == 'setm' or command == 'setmount' then
-      set_mount()
+      set_mount(args:concat(' '))
    elseif command == 'mount' then
       mount()
    elseif command == 'sws' or command == 'setws' then
@@ -87,8 +87,11 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      local companion = "♪Magic pot companion"
-      log(companion:gsub(' companion', ''):gsub('♪', ''))
+      -- local mounts = filter_table(windower.ffxi.get_key_items(), (function(k,v) 
+      --    return v > 3071 and v < 3108
+      -- end))
+
+      -- for k,v in pairs(mounts) do log(k,v) end
    end
 end)
 
@@ -116,16 +119,35 @@ function warp()
 end
 
 function display_mount()
-   windower.add_to_chat(settings.color.message, 'Current mount is the '..settings.mount:color(settings.color.green, settings.color.message))
+   if settings.mount then
+      windower.add_to_chat(color.message, 'Current mount is the '..settings.mount:color(color.green, color.message))
+   else
+      windower.add_to_chat(color.message, "No mount has been set")
+   end
+end
+
+function set_mount(mount_name)
+   if not T(windower.ffxi.get_key_items()):find(3055) then
+      windower.add_to_chat(color.message, "You can't summon mounts")
+      return
+   elseif not is_mount(mount_name) then
+      windower.add_to_chat(color.message, "That mount does not exist")
+      return
+   elseif not have_mount(mount_name) then
+      windower.add_to_chat(color.message, "You don't have that mount")
+      return
+   end
+
+   settings['mount'] = mount_name:lower()
+   settings:save()
+   windower.add_to_chat(color.message, "Mount has been set to "..settings.mount:color(color.green, color.message))
 end
 
 function mount()
-   local player = windower.ffxi.get_player()
-   local mounts = filter_table(windower.ffxi.get_key_items(), (function(k,_) return k > 3071 and k < 3108 end))
-   local have_mount = false
+   local buffs = windower.ffxi.get_player().buffs
    local mounted = false
 
-   for _, buff in pairs(player.buffs) do
+   for _, buff in pairs(buffs) do
       if buff == 252 then
          mounted = true
       end
@@ -133,17 +155,10 @@ function mount()
 
    if mounted then
       windower.send_command('input /dismount')
+   elseif have_mount() then
+      windower.send_command('input /mount '..settings.mount)
    else
-      for k,v in pairs(mounts) do
-         if settings.mount:lower() == v.en:gsub(' companion', ''):gsub('♪', ''):lower() then
-            windower.send_command('input /mount '..settings.mount)
-            mounted = true
-         end
-      end
-
-      if not mounted then
-         log("You don't have that mount")
-      end
+      windower.add_to_chat(color.message, "You don't have that mount")
    end
 end
 
@@ -188,7 +203,10 @@ function send(args)
       if target then target = target.id end
    end
    
-   if not target then return end
+   if not target then
+      windower.add_to_chat(color.notify, 'No target - cancelling operation')
+      return
+   end
    windower.send_command("send "..name.." ub cast "..spell.." "..target)
 end
 

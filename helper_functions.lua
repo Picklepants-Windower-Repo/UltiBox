@@ -2,14 +2,7 @@ require('sets')
 res = require('resources')
 
 function get_target(type)
-   local target = windower.ffxi.get_mob_by_target(type)
-
-   if not target then
-      log('No target - cancelling operation')
-      return false
-   end
-
-   return target
+   return windower.ffxi.get_mob_by_target(type)
 end
 
 function get_sub_target()
@@ -52,6 +45,30 @@ function spell_name_and_id(spell_name)
    end
 end
 
+function is_mount(mount_name)
+   for i=3072, 3107 do
+      if mount_name:lower() == res.key_items[i].en:gsub(' companion', ''):gsub('♪', ''):lower() then
+         return true
+      end
+   end
+
+   return false
+end
+
+function have_mount(mount_name)
+   local mounts = filter_table(windower.ffxi.get_key_items(), (function(_,v) 
+      return v > 3071 and v < 3108 
+   end))
+   
+   for _,v in pairs(mounts) do
+      if mount_name:lower() == res.key_items[v].en:gsub(' companion', ''):gsub('♪', ''):lower() then
+         return true
+      end
+   end
+
+   return false
+end
+
 function format_display_name(saved_name)
    if saved_name == '' then return false end
    
@@ -84,11 +101,11 @@ end
 function filter_table(table, match_function)
    local filtered_table = T{}
 
-   for element in pairs(table) do
-      if match_function(element) then
-         filter_table.append(element)
+   for k,v in pairs(table) do
+      if match_function(k,v) then
+         filtered_table[k] = v
       end
    end
 
-   return filter_table
+   return filtered_table
 end
