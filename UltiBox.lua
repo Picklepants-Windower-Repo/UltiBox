@@ -69,7 +69,7 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'attack' then
       attack_toggle()
    elseif command == 'follow' then
-      follow_toggle()
+      follow_toggle(args:concat(' '))
    elseif command == 'send' then
       send(args)
    elseif command == 'cast' then
@@ -87,7 +87,7 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      
+      log(windower.ffxi.get_player().index)
    end
 end)
 
@@ -171,13 +171,16 @@ function attack_toggle()
       windower.send_command("send picklepants /attack; wait 1; send @others /assist picklepants; wait 2; send @others /attack; wait 1; send @others /follow picklepants")
 end
 
-function follow_toggle()
-   local following = windower.ffxi.get_player().follow_index
+function follow_toggle(target)
+   if target == '' then
+      windower.send_command("send @others ub follow "..windower.ffxi.get_player().index)
+      return
+   end
 
-   if not following then
-      windower.send_command("input /follow picklepants")
+   if not windower.ffxi.get_player().follow_index then
+      windower.ffxi.follow(tonumber(target))
    else
-      windower.send_command("setkey numpad7 down; wait 0.1; setkey numpad7 up")
+      windower.ffxi.follow()
    end
 end
 
