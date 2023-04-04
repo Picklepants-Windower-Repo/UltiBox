@@ -52,6 +52,24 @@ function spell_name_and_id(spell_name)
    end
 end
 
+function format_display_name(saved_name)
+   if saved_name == '' then return false end
+   
+   saved_name = saved_name
+   :gsub('_', ' ')
+   
+   return saved_name
+end
+
+function format_save_name(set_name)
+   if set_name == '' then return false end
+   
+   set_name = set_name
+   :gsub(' ', '_')
+   
+   return set_name
+end
+
 function remove(table, key)
    new_table = T{}
    for k,v in pairs(table) do
@@ -63,20 +81,14 @@ function remove(table, key)
    return new_table
 end
 
-function format_display_name(saved_name)
-   if saved_name == '' then return false end
+function filter_table(table, match_function)
+   local filtered_table = T{}
 
-   saved_name = saved_name
-      :gsub('_', ' ')
+   for element in pairs(table) do
+      if match_function(element) then
+         filter_table.append(element)
+      end
+   end
 
-   return saved_name
-end
-
-function format_save_name(set_name)
-   if set_name == '' then return false end
-
-   set_name = set_name
-      :gsub(' ', '_')
-
-   return set_name
+   return filter_table
 end

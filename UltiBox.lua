@@ -32,12 +32,13 @@ config = require('config')
 require('helper_functions')
 
 local defaults = T{
+   buffs = T{},
+   mount = 'raptor',
    weaponskill = T{},
-   buffs = T{}
 }
 
 settings = config.load(defaults)
-settings:save('all')
+settings:save()
 
 key_pressed = ''
 
@@ -76,9 +77,8 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      word = 'test'
-      string = 'this is a test of the chat library color function'
-      log(string:match(word))
+      local companion = "♪Magic pot companion"
+      log(companion:gsub(' companion', ''):gsub('♪', ''))
    end
 end)
 
@@ -107,6 +107,8 @@ end
 
 function mount()
    local player = windower.ffxi.get_player()
+   local mounts = filter_table(windower.ffxi.get_key_items(), (function(k,_) return k > 3071 and k < 3108 end))
+   local have_mount = false
    local mounted = false
 
    for _, buff in pairs(player.buffs) do
@@ -117,8 +119,17 @@ function mount()
 
    if mounted then
       windower.send_command('input /dismount')
-   else   
-      windower.send_command('input /mount raptor')
+   else
+      for k,v in pairs(mounts) do
+         if settings.mount:lower() == v.en:gsub(' companion', ''):gsub('♪', ''):lower() then
+            windower.send_command('input /mount '..settings.mount)
+            mounted = true
+         end
+      end
+
+      if not mounted then
+         log("You don't have that mount")
+      end
    end
 end
 
@@ -127,7 +138,7 @@ function set_weaponskill(args)
    local skill = (table.concat(args, ' ')):gsub(name..' ', '')
 
    settings.weaponskill[name] = skill
-   settings:save('all')
+   settings:save()
    if settings.multibox then multibox_binds() end
    log(skill..' has been saved for '..name)
 end
@@ -278,14 +289,14 @@ function add_buff(buff)
    local buff_cast_time = res.spells[buff_id].cast_time
    
    settings.buffs[format_save_name(buff_name)] = {id = buff_id, cast_time = buff_cast_time}
-   settings:save('all')
+   settings:save()
    log(buff_name..' has been added to buffs')
 end
 
 function remove_buff(buff)
    if buff:lower() == 'all' then
       settings.buffs = T{}
-      settings:save('all')
+      settings:save()
       log('All buffs have been removed')
       return
    end
@@ -302,7 +313,7 @@ function remove_buff(buff)
    end
 
    settings.buffs = remove(settings.buffs, format_save_name(buff_name):lower())
-   settings:save('all')
+   settings:save()
    log(buff_name..' has been removed from buffs')
 end
 
