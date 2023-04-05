@@ -88,7 +88,8 @@ windower.register_event('addon command', function(command, ...)
    elseif command == 'consumables' then
       consumables()
    elseif command == 'test' then
-      log(windower.ffxi.get_player().target_locked)
+      -- for k,v in pairs(windower.ffxi.get_items('equipment')) do log(k,v) end
+      for k,v in pairs(windower.ffxi.get_items(10, 57)) do log(k,v) end
    end
 end)
 
@@ -104,11 +105,9 @@ end)
 
 function warp()
    local equipment = windower.ffxi.get_items('equipment')
-   local bag = equipment['right_ring_bag']
-   local index = equipment['right_ring']
-   local item_data = windower.ffxi.get_items(bag, index)
+   local item = windower.ffxi.get_items(equipment.right_ring_bag, equipment.right_ring)
 
-   if item_data.id == 28540 then
+   if item.id == 28540 then
       windower.send_command("input /item 'warp ring' <me>")
    else
       windower.send_command("input /equip ring2 'warp ring'; wait 11; input /item 'warp ring' <me>")
@@ -169,21 +168,20 @@ end
 
 function assist_toggle(assist_target)
    local player = windower.ffxi.get_player()
-
-   if not player.in_combat then
-      windower.add_to_chat(color.message, "You are not in combat")
-      return
-   end
-
+   
    if assist_target == '' then
-      windower.send_command("send @others ub assist "..player.name)
+      if not player.in_combat then
+         windower.add_to_chat(color.message, "You are not in combat")
+      else
+         windower.send_command("send @others ub assist "..player.name)
+      end
+
       return
    end
 
    if not player.in_combat then
-      windower.send_command("input /assist "..assist_target)
-      coroutine.sleep(1.5)
-      windower.send_command("input /attack")
+      log('fire')
+      windower.send_command("input /assist "..assist_target.."; wait 1.5; input /attack")
    else
       windower.send_command("input /attack")
       if player.target_locked then
